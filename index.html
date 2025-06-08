@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevGenX | Modern IT Courses for Tech Enthusiasts</title>
+    <meta name="description" content="Learn in-demand tech skills with DevGenX. Coding courses for GenZ and GenXY learners with hands-on projects.">
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        accent: '#ec4899',
+                        dark: '#1e293b',
+                        light: '#f8fafc',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Firebase and Razorpay scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero-bg {
+            background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0) 30%),
+                        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0) 30%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .course-desc {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-dark min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-code text-primary text-2xl mr-2"></i>
+                        <span class="text-xl font-bold gradient-text">DevGenX</span>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#courses" class="text-gray-700 hover:text-primary transition">Courses</a>
+                    <a href="#features" class="text-gray-700 hover:text-primary transition">Features</a>
+                    <a href="#reviews" class="text-gray-700 hover:text-primary transition">Reviews</a>
+                    <button id="auth-btn" class="px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition">
+                        Sign In
+                    </button>
+                    <div id="user-dropdown" class="hidden relative">
+                        <button id="user-menu-btn" class="flex items-center space-x-2">
+                            <img id="user-avatar" class="h-8 w-8 rounded-full" src="https://via.placeholder.com/32" alt="User">
+                            <span id="user-name" class="text-sm font-medium"></span>
+                        </button>
+                        <div id="dropdown-content" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
+                            <a href="#" id="sign-out-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-500 hover:text-primary focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden pb-3 px-4">
+            <a href="#courses" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Courses</a>
+            <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Features</a>
+            <a href="#reviews" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50">Reviews</a>
+            <button id="mobile-auth-btn" class="mt-2 w-full px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition">
+                Sign In
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="text-center md:text-left">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                        <span class="gradient-text">Code The Future</span> With Our Cutting-Edge Courses
+                    </h1>
+                    <p class="text-lg text-gray-600 mb-8 max-w-lg">
+                        Master in-demand tech skills with hands-on projects and industry expert instructors. Whether you're a beginner or looking to level up, we've got you covered.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                        <a href="#courses" class="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition flex items-center justify-center space-x-2">
+                            <i class="fas fa-laptop-code"></i>
+                            <span>Explore Courses</span>
+                        </a>
+                        <button id="watch-demo-btn" class="px-6 py-3 bg-white text-primary border border-primary rounded-lg font-medium hover:bg-primary/10 transition flex items-center justify-center space-x-2">
+                            <i class="fas fa-play"></i>
+                            <span>Watch Demo</span>
+                        </button>
+                    </div>
+                    <div class="mt-8 flex items-center justify-center md:justify-start space-x-2 text-gray-500">
+                        <i class="fas fa-shield-alt"></i>
+                        <span class="text-sm">100% secure payment with Razorpay</span>
+                    </div>
+                </div>
+                <div class="hidden md:block relative">
+                    <div class="relative floating">
+                        <div class="absolute -top-6 -left-6 w-32 h-32 bg-accent/20 rounded-full blur-xl"></div>
+                        <div class="absolute -top-6 -right-6 w-32 h-32 bg-primary/20 rounded-full blur-xl"></div>
+                        <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-secondary/20 rounded-full blur-xl"></div>
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Coding" class="rounded-2xl shadow-xl relative z-10">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold gradient-text mb-4">Why Choose DevGenX?</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">We're built different with a focus on practical learning that actually prepares you for real-world challenges.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-bolt text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Fast-Paced Learning</h3>
+                    <p class="text-gray-600">Short, focused lessons that cut through the fluff and teach you exactly what you need to know.</p>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-laptop-code text-secondary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Hands-On Projects</h3>
+                    <p class="text-gray-600">Build real projects and add them to your portfolio from day one.</p>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-headset text-accent text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Community Support</h3>
+                    <p class="text-gray-600">24/7 access to our vibrant community and direct instructor support.</p>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-md transition">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-briefcase text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Career Services</h3>
+                    <p class="text-gray-600">Resume reviews, interview prep, and job placement assistance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section id="courses" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold gradient-text mb-4">Featured Courses</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Bite-sized courses packed with practical knowledge you can apply immediately.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12" id="courses-container">
+                <!-- Courses will be loaded dynamically from Firestore -->
+                <div class="text-center py-10">
+                    <i class="fas fa-spinner fa-spin text-4xl text-primary"></i>
+                    <p class="mt-4">Loading courses...</p>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <a href="#" class="inline-block px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition">
+                    View All Courses (Coming Soon)
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-primary to-accent rounded-2xl p-8 text-white shadow-lg">
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <p class="text-4xl md:text-5xl font-bold mb-2" id="students-count">10K+</p>
+                        <p class="text-lg">Happy Students</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-4xl md:text-5xl font-bold mb-2" id="courses-count">50+</p>
+                        <p class="text-lg">Quality Courses</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-4xl md:text-5xl font-bold mb-2" id="hours-count">1M+</p>
+                        <p class="text-lg">Learning Hours</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="reviews" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold gradient-text mb-4">What Our Students Say</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Don't just take our word for it - hear from our amazing community.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Student" class="w-12 h-12 rounded-full">
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Sarah J.</h4>
+                            <p class="text-gray-500 text-sm">Frontend Developer</p>
+                        </div>
+                    </div>
+                    <div class="flex mb-2 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-gray-700">"The React course was a game-changer for me. Within 3 months I went from knowing nothing to landing my first developer job!"</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition md:transform md:scale-105 md:z-10">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Student" class="w-12 h-12 rounded-full">
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Ryan P.</h4>
+                            <p class="text-gray-500 text-sm">Data Scientist</p>
+                        </div>
+                    </div>
+                    <div class="flex mb-2 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-gray-700">"I went through several Python courses before, but the teaching approach here made everything click. The capstone project was incredibly valuable."</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Student" class="w-12 h-12 rounded-full">
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Emma L.</h4>
+                            <p class="text-gray-500 text-sm">UX Designer</p>
+                        </div>
+                    </div>
+                    <div class="flex mb-2 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="text-gray-700">"The design courses are so practical. I learned Figma faster than I thought possible and the community feedback helped me improve my work."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-primary rounded-3xl p-12 text-center shadow-xl">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Transform Your Tech Career?</h2>
+                <p class="text-primary-100 text-lg max-w-3xl mx-auto mb-8">Join thousands of students who've successfully transitioned into tech with our proven approach.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#courses" class="px-8 py-4 bg-white text-primary rounded-lg font-bold hover:bg-gray-100 transition">
+                        Browse Courses
+                    </a>
+                    <button id="cta-signup-btn" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition">
+                        Start Learning Free
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-code text-primary text-2xl mr-2"></i>
+                        <span class="text-xl font-bold gradient-text">DevGenX</span>
+                    </div>
+                    <p class="text-gray-400">Coding the future, one student at a time. Empowering the next generation of developers and tech professionals.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-discord"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Courses</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Full Stack Development</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Data Science</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">UX/UI Design</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">DevOps</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Mobile Development</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Resources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Scholarships</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Community</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Company</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Instructors</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Terms</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500 text-sm">
+                <p>© 2023 DevGenX. All rights reserved. Made with <i class="fas fa-heart text-primary"></i> by tech enthusiasts.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Course Modal -->
+    <div id="course-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 id="modal-course-title" class="text-xl font-bold">Course Title</h3>
+                        <div class="flex items-center mt-1">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(120 reviews)</span>
+                        </div>
+                    </div>
+                    <button id="close-modal" class="text-gray-500 hover:text-primary">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <img id="modal-course-image" src="" alt="Course" class="w-full h-48 object-cover rounded-lg mb-4">
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-gray-500 text-sm">Duration</p>
+                        <p id="modal-course-duration" class="font-medium">8 weeks</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-gray-500 text-sm">Level</p>
+                        <p id="modal-course-level" class="font-medium">Beginner</p>
+                    </div>
+                </div>
+                
+                <h4 class="font-semibold mb-2">About This Course</h4>
+                <p id="modal-course-description" class="text-gray-700 mb-6">Course description goes here.</p>
+                
+                <div class="bg-blue-50 border border-blue-100 p-4 rounded-lg mb-6">
+                    <h4 class="font-semibold text-blue-800 mb-2">What You'll Learn</h4>
+                    <ul id="modal-course-features" class="list-disc list-inside text-blue-700 space-y-1">
+                        <!-- Features will be added dynamically -->
+                    </ul>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="line-through text-gray-500" id="modal-original-price">₹5,999</span>
+                        <span class="text-xl font-bold ml-2" id="modal-current-price">₹3,999</span>
+                    </div>
+                    <button id="enroll-btn" class="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition">
+                        Enroll Now <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl max-w-md w-full mx-4">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold gradient-text">Welcome to DevGenX</h3>
+                    <button id="close-auth-modal" class="text-gray-500 hover:text-primary">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <p class="text-gray-600 mb-6">Continue with your preferred login method to access your courses.</p>
+                
+                <button id="google-signin-btn" class="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="h-5 w-5">
+                    <span>Continue with Google</span>
+                </button>
+                
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or</span>
+                    </div>
+                </div>
+                
+                <form id="email-form">
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="you@example.com" required>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 transition">
+                        Continue with Email
+                    </button>
+                </form>
+                
+                <p class="text-sm text-gray-500 mt-6">
+                    By continuing, you agree to our <a href="#" class="text-primary hover:underline">Terms of Service</a> and <a href="#" class="text-primary hover:underline">Privacy Policy</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg flex flex-col items-center">
+            <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p id="loading-text" class="text-lg font-medium">Processing</p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+       const firebaseConfig = {
+    apiKey: "AIzaSyD8qfTONL-4iu5qJ4zRJnNGC6_8_4x4WV4",
+    authDomain: "devgenx-3dff4.firebaseapp.com",
+    projectId: "devgenx-3dff4",
+    storageBucket: "devgenx-3dff4.firebasestorage.app",
+    messagingSenderId: "1006530549096",
+    appId: "1:1006530549096:web:1c97728dc1511e526a32dd",
+    measurementId: "G-2DYQB2K2KW"
+  };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // DOM Elements
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const authBtn = document.getElementById('auth-btn');
+        const mobileAuthBtn = document.getElementById('mobile-auth-btn');
+        const authModal = document.getElementById('auth-modal');
+        const closeAuthModal = document.getElementById('close-auth-modal');
+        const googleSigninBtn = document.getElementById('google-signin-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const dropdownContent = document.getElementById('dropdown-content');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const courseModal = document.getElementById('course-modal');
+        const closeModal = document.getElementById('close-modal');
+        const enrollBtn = document.getElementById('enroll-btn');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const loadingText = document.getElementById('loading-text');
+        const coursesContainer = document.getElementById('courses-container');
+        const watchDemoBtn = document.getElementById('watch-demo-btn');
+        
+        // Mobile menu toggle
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Auth modal toggle
+        const toggleAuthModal = () => {
+            authModal.classList.toggle('hidden');
+            document.body.style.overflow = authModal.classList.contains('hidden') ? 'auto' : 'hidden';
+        };
+        
+        authBtn.addEventListener('click', toggleAuthModal);
+        mobileAuthBtn.addEventListener('click', toggleAuthModal);
+        closeAuthModal.addEventListener('click', toggleAuthModal);
+        
+        // User dropdown toggle
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownContent.classList.toggle('hidden');
+        });
+        
+        // Close dropdown when clicking elsewhere
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.contains(e.target)) {
+                dropdownContent.classList.add('hidden');
+            }
+        });
+        
+        // Course modal toggle
+        const toggleCourseModal = () => {
+            courseModal.classList.toggle('hidden');
+            document.body.style.overflow = courseModal.classList.contains('hidden') ? 'auto' : 'hidden';
+        };
+        
+        closeModal.addEventListener('click', toggleCourseModal);
+        
+        // Close modal when clicking on backdrop
+        courseModal.addEventListener('click', (e) => {
+            if (e.target === courseModal) {
+                toggleCourseModal();
+            }
+        });
+        
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                toggleAuthModal();
+            }
+        });
+        
+        // Google Sign-In
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+        
+        googleSigninBtn.addEventListener('click', () => {
+            showLoading('Signing in with Google...');
+            auth.signInWithPopup(googleProvider)
+                .then((result) => {
+                    hideLoading();
+                    toggleAuthModal();
+                    updateAuthUI(result.user);
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error('Google Sign-In Error:', error);
+                    alert('Failed to sign in with Google. Please try again.');
+                });
+        });
+        
+        // Email Sign-In
+        const emailForm = document.getElementById('email-form');
+        
+        emailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            
+            showLoading('Sending magic link...');
+            // In a real implementation, you would send a sign-in link to the user's email
+            // For this example, we'll just simulate it
+            setTimeout(() => {
+                hideLoading();
+                alert(`A magic link has been sent to ${email}. Please check your inbox.`);
+                toggleAuthModal();
+            }, 1500);
+        });
+        
+        // Sign Out
+        signOutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                updateAuthUI(null);
+                dropdownContent.classList.add('hidden');
+            });
+        });
+        
+        // Update UI based on auth state
+        const updateAuthUI = (user) => {
+            if (user) {
+                // User is signed in
+                authBtn.classList.add('hidden');
+                mobileAuthBtn.classList.add('hidden');
+                userDropdown.classList.remove('hidden');
+                
+                // Display user info
+                userAvatar.src = user.photoURL || 'https://via.placeholder.com/32';
+                userName.textContent = user.displayName || 'User';
+                
+                // Load user's enrolled courses
+                // In a real implementation, you would fetch this from Firestore
+            } else {
+                // User is signed out
+                authBtn.classList.remove('hidden');
+                mobileAuthBtn.classList.remove('hidden');
+                userDropdown.classList.add('hidden');
+            }
+        };
+        
+        // Auth state observer
+        auth.onAuthStateChanged((user) => {
+            updateAuthUI(user);
+        });
+        
+        // Loading functions
+        const showLoading = (text = 'Loading...') => {
+            loadingText.textContent = text;
+            loadingSpinner.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+        
+        const hideLoading = () => {
+            loadingSpinner.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+        
+        // Course enrollment
+        enrollBtn.addEventListener('click', () => {
+            if (!auth.currentUser) {
+                toggleCourseModal();
+                toggleAuthModal();
+                return;
+            }
+            
+            // In a real implementation, you would create a Razorpay payment
+            showLoading('Processing enrollment...');
+            
+            // Simulate payment processing
+            setTimeout(() => {
+                hideLoading();
+                alert('Payment successful! You now have access to the course.');
+                toggleCourseModal();
+            }, 2000);
+        });
+        
+        // Watch demo button
+        watchDemoBtn.addEventListener('click', () => {
+            alert('This would open a demo video in a modal or new tab.');
+        });
+        
+        // CTA signup button
+        document.getElementById('cta-signup-btn').addEventListener('click', () => {
+            toggleAuthModal();
+        });
+        
+        // Load courses from Firestore
+        const loadCourses = () => {
+            // In a real implementation, this would fetch from Firestore
+            // For this demo, we'll use mock data
+            const mockCourses = [
+                {
+                    id: '1',
+                    title: 'React Mastery Bootcamp',
+                    description: 'Go from zero to hero with React in just 6 weeks. Build modern, responsive web applications with hooks, context, and more.',
+                    image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                    duration: '6 weeks',
+                    level: 'Intermediate',
+                    originalPrice: 4999,
+                    currentPrice: 3499,
+                    features: [
+                        'Build 5 real-world projects',
+                        'Master React hooks and context',
+                        'Learn performance optimization',
+                        'Complete portfolio-worthy capstone'
+                    ]
+                },
+                {
+                    id: '2',
+                    title: 'Python for Data Science',
+                    description: 'Learn Python from scratch and dive into data analysis with Pandas, NumPy, and Matplotlib. Perfect for beginners.',
+                    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                    duration: '8 weeks',
+                    level: 'Beginner',
+                    originalPrice: 5999,
+                    currentPrice: 3999,
+                    features: [
+                        'Data cleaning and preparation',
+                        'Basic machine learning concepts',
+                        'Data visualization techniques',
+                        'Real-world case studies'
+                    ]
+                },
+                {
+                    id: '3',
+                    title: 'Full Stack JavaScript',
+                    description: 'Become a full-stack developer with Node.js, Express, and MongoDB. Learn authentication, APIs, and deployment.',
+                    image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                    duration: '10 weeks',
+                    level: 'Advanced',
+                    originalPrice: 8999,
+                    currentPrice: 6499,
+                    features: [
+                        'Build RESTful APIs',
+                        'JWT authentication',
+                        'Deployment to cloud platforms',
+                        'End-to-end project'
+                    ]
+                }
+            ];
+            
+            coursesContainer.innerHTML = '';
+            
+            mockCourses.forEach(course => {
+                const courseCard = document.createElement('div');
+                courseCard.className = 'bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition card-hover';
+                courseCard.innerHTML = `
+                    <img src="${course.image}" alt="${course.title}" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-lg font-bold">${course.title}</h3>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">${course.level}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm course-desc mb-4">${course.description}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500 text-sm"><i class="far fa-clock mr-1"></i>${course.duration}</span>
+                            <span class="text-primary font-semibold">₹${course.currentPrice.toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+                
+                courseCard.addEventListener('click', () => {
+                    openCourseModal(course);
+                });
+                
+                coursesContainer.appendChild(courseCard);
+            });
+        };
+        
+        // Open course modal with course details
+        const openCourseModal = (course) => {
+            document.getElementById('modal-course-title').textContent = course.title;
+            document.getElementById('modal-course-image').src = course.image;
+            document.getElementById('modal-course-duration').textContent = course.duration;
+            document.getElementById('modal-course-level').textContent = course.level;
+            document.getElementById('modal-course-description').textContent = course.description;
+            document.getElementById('modal-original-price').textContent = `₹${course.originalPrice.toLocaleString()}`;
+            document.getElementById('modal-current-price').textContent = `₹${course.currentPrice.toLocaleString()}`;
+            
+            const featuresList = document.getElementById('modal-course-features');
+            featuresList.innerHTML = '';
+            
+            course.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+            
+            toggleCourseModal();
+        };
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCourses();
+            
+            // Count animation
+            animateValue('students-count', 0, 12850, 1500);
+            animateValue('courses-count', 0, 57, 1000);
+            animateValue('hours-count', 0, 1250000, 2000);
+        });
+        
+        // Value animation helper
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                obj.innerHTML = value.toLocaleString() + (id === 'hours-count' ? '+' : '+');
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+    </script>
+</body>
+</html>
